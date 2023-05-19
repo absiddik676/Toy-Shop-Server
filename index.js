@@ -29,6 +29,18 @@ async function run() {
 
     const ToysCollection =  client.db('ToysDB').collection('ToysCollection')
 
+    app.get('/toys/:category',async(req,res)=>{
+        const subCategory = req.params.category;
+        console.log(subCategory);
+        const query = { category: subCategory };
+        const result = await ToysCollection.find(query).toArray()
+        res.send(result)
+    })
+
+    app.get('/allToy',async(req,res)=>{
+        
+    })
+
     app.post('/addToy',async(req,res)=>{
         const data = req.body
         const result = await ToysCollection.insertOne(data)
