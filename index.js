@@ -1,9 +1,9 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require("dotenv").config();
 
-const app =express();
+const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(cors());
@@ -27,34 +27,58 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const ToysCollection =  client.db('ToysDB').collection('ToysCollection')
+    const ToysCollection = client.db('ToysDB').collection('ToysCollection')
 
-    app.get('/toys/:category',async(req,res)=>{
-        const subCategory = req.params.category;
-        console.log(subCategory);
-        const query = { category: subCategory };
-        const result = await ToysCollection.find(query).toArray()
-        res.send(result)
-    })
-
-    app.get('/allToy',async(req,res)=>{
-      console.log(req.query);
-      const limitCount = req.query.limit;
-        const result = await ToysCollection.find().limit(parseInt(limitCount)).toArray();
-        res.send(result)
-    })
-
-    app.get('/searchToy/:text',async(req,res)=>{
-      const limitCount = req.query.limit;
-      const text = req.params.text;
-      const result = await ToysCollection.find({ ToyName: { $regex:text, $options: "i" } }).limit(parseInt(limitCount)).toArray();
+    // get every category wise toy
+    app.get('/toys/:category', async (req, res) => {
+      const subCategory = req.params.category;
+      console.log(subCategory);
+      const query = { category: subCategory };
+      const result = await ToysCollection.find(query).toArray()
       res.send(result)
     })
 
-    app.post('/addToy',async(req,res)=>{
-        const data = req.body
-        const result = await ToysCollection.insertOne(data)
-        res.send(result)
+    // get all toy
+    app.get('/allToy', async (req, res) => {
+      console.log(req.query);
+      const limitCount = req.query.limit;
+      const result = await ToysCollection.find().limit(parseInt(limitCount)).toArray();
+      res.send(result)
+    })
+
+    // get searches toy
+    app.get('/searchToy/:text', async (req, res) => {
+      const limitCount = req.query.limit;
+      const text = req.params.text;
+      const result = await ToysCollection.find({ ToyName: { $regex: text, $options: "i" } }).limit(parseInt(limitCount)).toArray();
+      res.send(result)
+    })
+
+
+    // get user posted toys
+    app.get('/myToy/:email', async (req, res) => {
+      const userEmail = req.params.email;
+      const query = { sellerEmail: userEmail }
+      const result = await ToysCollection.find(query).toArray();
+      res.send(result)
+      console.log(userEmail);
+    })
+
+    // add toy into database
+    app.post('/addToy', async (req, res) => {
+      const data = req.body
+      const result = await ToysCollection.insertOne(data)
+      res.send(result)
+    })
+
+    // delete a toy
+
+    app.delete('/deleteToy/:id',async(req,res)=>{
+      console.log(req.params.id);
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)};
+      const result = await ToysCollection.deleteOne(query);
+      res.send(result)
     })
 
 
@@ -71,10 +95,10 @@ run().catch(console.dir);
 
 
 
-app.get('/',(req,res)=>{
-    res.send('Toy shop server is running')
+app.get('/', (req, res) => {
+  res.send('Toy shop server is running')
 })
 
-app.listen(port,()=>{
-    console.log('toy server is running on port',port)
+app.listen(port, () => {
+  console.log('toy server is running on port', port)
 })
