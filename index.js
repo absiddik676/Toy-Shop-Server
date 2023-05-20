@@ -38,8 +38,13 @@ async function run() {
     })
 
     app.get('/allToy',async(req,res)=>{
-        
+      console.log(req.query);
+      const limitCount = req.query.limit;
+        const result = await ToysCollection.find().limit(parseInt(limitCount)).toArray();
+        res.send(result)
     })
+
+   
 
     app.post('/addToy',async(req,res)=>{
         const data = req.body
