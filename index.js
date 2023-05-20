@@ -44,7 +44,12 @@ async function run() {
         res.send(result)
     })
 
-   
+    app.get('/searchToy/:text',async(req,res)=>{
+      const limitCount = req.query.limit;
+      const text = req.params.text;
+      const result = await ToysCollection.find({ ToyName: { $regex:text, $options: "i" } }).limit(parseInt(limitCount)).toArray();
+      res.send(result)
+    })
 
     app.post('/addToy',async(req,res)=>{
         const data = req.body
