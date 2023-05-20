@@ -32,7 +32,6 @@ async function run() {
     // get every category wise toy
     app.get('/toys/:category', async (req, res) => {
       const subCategory = req.params.category;
-      console.log(subCategory);
       const query = { category: subCategory };
       const result = await ToysCollection.find(query).toArray()
       res.send(result)
@@ -40,7 +39,6 @@ async function run() {
 
     // get all toy
     app.get('/allToy', async (req, res) => {
-      console.log(req.query);
       const limitCount = req.query.limit;
       const result = await ToysCollection.find().limit(parseInt(limitCount)).toArray();
       res.send(result)
@@ -61,7 +59,6 @@ async function run() {
       const query = { sellerEmail: userEmail }
       const result = await ToysCollection.find(query).toArray();
       res.send(result)
-      console.log(userEmail);
     })
 
     // add toy into database
@@ -71,8 +68,26 @@ async function run() {
       res.send(result)
     })
 
-    // delete a toy
+    app.put('/updateToy/:id',async(req,res)=>{
+      const id = req.params.id;
+      const data = req.body;
+      console.log(data);
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          price:data.price,
+          quantity:data.quantity,
+          description:data.description
+        },
+      };
+      const result = await ToysCollection.updateOne(filter, updateDoc);
+      console.log(result);
+      res.send(result)
 
+    })
+
+
+    // delete a toy
     app.delete('/deleteToy/:id',async(req,res)=>{
       console.log(req.params.id);
       const id = req.params.id;
