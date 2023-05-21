@@ -25,7 +25,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+   
 
     const ToysCollection = client.db('ToysDB').collection('ToysCollection')
 
@@ -52,6 +52,12 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/toy/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const toy = await ToysCollection.findOne(query);
+      res.send(toy)
+    })
 
     // get user posted toys
     app.get('/myToy/:email', async (req, res) => {
@@ -68,10 +74,10 @@ async function run() {
       res.send(result)
     })
 
+    // Update toy data
     app.put('/updateToy/:id',async(req,res)=>{
       const id = req.params.id;
       const data = req.body;
-      console.log(data);
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
@@ -86,12 +92,17 @@ async function run() {
 
     })
 
+    app.get('/sortData/:option',async(req,res)=>{
+      const email = req.query.email
+      const sortedData = await ToysCollection.find({sellerEmail:email}).sort({price:req.params.option}).toArray();
+      res.send(sortedData)
+
+    })
 
     // delete a toy
     app.delete('/deleteToy/:id',async(req,res)=>{
-      console.log(req.params.id);
       const id = req.params.id;
-      const query = {_id : new ObjectId(id)};
+      const query = {_id:new ObjectId(id)};
       const result = await ToysCollection.deleteOne(query);
       res.send(result)
     })
@@ -99,8 +110,8 @@ async function run() {
 
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
